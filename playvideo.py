@@ -31,18 +31,32 @@ audio_segment = None
 audio_start_time = None
 
 def play_audio():
-    print("HJRERE")
-    global audio_segment, audio_playback, audio_start_time
-    audio_segment = AudioSegment.from_file("output.mov", format="mov")
-    audio_playback = psa(audio_segment)
-    audio_start_time = time.time()
+    global audio_segment, start_time, multiplier
+    print("Starting audio playback...")
+    audio_segment = AudioSegment.from_file("output.mp3")
+    start_time = time.time()
+
+    def audio_playback_thread():
+        global audio_segment, start_time, multiplier
+        while not paused:
+            elapsed_time = (time.time() - start_time) * 1000
+            segment = audio_segment[max(0, int(elapsed_time)):]
+            if segment:
+                segment = segment.speedup(playback_speed=multiplier)
+                play(segment)
+            if len(segment) < 1000:
+                break
+            time.sleep(0.1)
+
+    audio_thread = threading.Thread(target=audio_playback_thread, daemon=True)
+    audio_thread.start()
 
 def update_audio_position():
-    print("HERE")
-    global audio_playback, audio_start_time
-    if audio_playback is not None and not paused:
-        elapsed_time = (time.time() - audio_start_time) * 1000
-        audio_playback.seek(elapsed_time)
+    global audio_segment, start_time
+    if audio_segment is not None and not paused:
+        elapsed_time = (time.time() - start_time) * 1000
+        print(f"Audio elapsed time: {elapsed_time} ms")
+
 
 def update_frame():
     global cap, video_label, fps, paused, multiplier, last_time, use_optimizer
