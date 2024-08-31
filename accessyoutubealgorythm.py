@@ -10,7 +10,7 @@ import time
 
 
 options = webdriver.ChromeOptions()
-
+options.page_load_strategy = 'eager'
 options.add_argument("--disable-blink-features=AutomationControlled")
 options.add_experimental_option("excludeSwitches", ["enable-automation"])
 options.add_experimental_option("useAutomationExtension", False)
@@ -59,23 +59,16 @@ except:
 WebDriverWait(driver, 1000).until(lambda driver: driver.execute_script("return document.readyState") == "complete")
 
 def find_recommendations():
-    links = []
-    xpath_num = 0
-    while len(links) != 10:
-        xpath_num += 1
-        xpath = f"/html/body/ytd-app/div[1]/ytd-page-manager/ytd-browse/ytd-two-column-browse-results-renderer/div[1]/ytd-rich-grid-renderer/div[6]/ytd-rich-item-renderer[{xpath_num}]/div/ytd-rich-grid-media/div[1]/div[3]/div[2]/h3/a/yt-formatted-string"
-        element = driver.find_element(By.XPATH, xpath)
-        driver.execute_script("window.open(arguments[0], '_blank');", element.get_attribute('href'))
-        time.sleep(2)
-        original_tab = driver.current_window_handle
-        driver.switch_to.window(driver.window_handles[-1])
-        new_url = driver.current_url
-        print(f"The link leads to: {new_url}")
-        driver.close()
-        driver.switch_to.window(original_tab)
-        links.append(new_url)
+    global actions
+    video_elements = driver.find_elements(By.XPATH, '//*[@id="video-title"]')
 
-    return links
+    links = []
+    for i in range(min(10, len(video_elements))):
+        video_url = video_elements[i].get_attribute('href')
+        links.append(video_url)
+
+    for idx, video in enumerate(links):
+        print(f"{idx + 1}: {video}")
 
 if __name__ == "__main__":
     find_recommendations()
