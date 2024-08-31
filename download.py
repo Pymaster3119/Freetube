@@ -1,6 +1,5 @@
 import os
 import subprocess
-from moviepy.editor import VideoFileClip, concatenate_videoclips
 
 def convert_to_mov(input_path, output_path):
     command = [
@@ -25,7 +24,3 @@ def download_youtube_video(url):
         convert_to_mov("output.mkv", "output.mov")
     except:
         pass
-
-if __name__ == "__main__":
-    video_url = "https://www.youtube.com/watch?v=qj_oIo_Ncas"
-    download_youtube_video(video_url)
