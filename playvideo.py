@@ -101,12 +101,9 @@ def play_video():
     fps = num / den
     print(fps)
 
-    # Load audio
     audio_segment = AudioSegment.from_mp3("output.mp3")
     current_audio_position = 0
     start_time = time.time()
-
-    # Start audio playback
     audio_thread = threading.Thread(target=play_audio)
     audio_thread.start()
 
