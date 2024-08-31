@@ -12,6 +12,7 @@ def convert_to_mov(input_path, output_path):
         '-strict', 'experimental',
         '-threads', '8',
         '-crf', '35',
+        '-movflags', 'faststart',
         output_path
     ]
     subprocess.run(command, check=True)
