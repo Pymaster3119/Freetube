@@ -8,6 +8,7 @@ import json
 from pydub import AudioSegment
 from pydub.playback import play
 import threading
+from pydub.playback import _play_with_simpleaudio as psa
 
 cap = None
 video_label = None
@@ -19,29 +20,58 @@ paused = False
 audio_segment = None
 audio_thread = None
 current_audio_position = 0
+import time
+last_time = time.time()
+use_optimizer = False
+
 start_time = 0
 
+audio_playback = None
+audio_segment = None
+audio_start_time = None
+
+def play_audio():
+    print("HJRERE")
+    global audio_segment, audio_playback, audio_start_time
+    audio_segment = AudioSegment.from_file("output.mov", format="mov")
+    audio_playback = psa(audio_segment)
+    audio_start_time = time.time()
+
+def update_audio_position():
+    print("HERE")
+    global audio_playback, audio_start_time
+    if audio_playback is not None and not paused:
+        elapsed_time = (time.time() - audio_start_time) * 1000
+        audio_playback.seek(elapsed_time)
+
 def update_frame():
-    global cap, video_label, fps, paused, multiplier, start_time, current_audio_position
+    global cap, video_label, fps, paused, multiplier, last_time, use_optimizer
     if not paused:
         ret, frame = cap.read()
         if ret:
+            current_time = time.time()
+            frame_time = (current_time - last_time) * 1000 
+            delay_time = int(round((1000/fps) / multiplier))
+            if frame_time > delay_time and use_optimizer:
+                last_time = current_time
+                update_audio_position()
+                root.after(1, update_frame)
+
+            last_time = current_time
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             image = Image.fromarray(frame)
             photo = ImageTk.PhotoImage(image=image)
             video_label.config(image=photo)
             video_label.image = photo
-            root.after(int(round((1000/fps)/multiplier)), update_frame)
+            
+            use_optimizer = True
+            update_audio_position()
+            root.after(delay_time, update_frame)
         else:
             cap.release()
     else:
+        print("Paused")
         root.after(1, update_frame)
-
-def play_audio():
-    global audio_segment, start_time, current_audio_position, multiplier
-    segment = audio_segment[current_audio_position:]
-    segment = segment.speedup(playback_speed=multiplier)
-    play(segment)
 
 def load_video():
     global root, video_URL
@@ -118,5 +148,6 @@ def play_video():
 
 tk.Entry(root, textvariable=video_URL).pack()
 tk.Button(root, text="Load Video", command=load_video).pack()
+cv2.setUseOptimized(True)
 
 root.mainloop()
