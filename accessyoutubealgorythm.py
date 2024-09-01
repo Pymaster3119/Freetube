@@ -35,8 +35,8 @@ actions.send_keys(username).perform()
 actions.move_by_offset(-776, -842).perform()
 WebDriverWait(driver, 1000).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div[1]/div[2]/c-wiz/div/div[3]/div/div[1]/div/div/button/div[3]")))
 print(driver.find_element(By.XPATH, "/html/body/div[1]/div[1]/div[2]/c-wiz/div/div[3]/div/div[1]/div/div/button/div[3]").location)
-actions.move_by_offset(737, 816).click().perform()
-actions.move_by_offset(-737, -816).perform()
+actions.move_by_offset(737, 821).click().perform()
+actions.move_by_offset(-737, -821).perform()
 WebDriverWait(driver, 1000).until(lambda driver: driver.execute_script("return document.readyState") == "complete")
 
 #Send password
@@ -45,8 +45,8 @@ actions.move_by_offset(776, 842).click().perform()
 actions.send_keys(password).perform()
 actions.move_by_offset(-776, -842).perform()
 WebDriverWait(driver, 1000).until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div[1]/div[2]/c-wiz/div/div[3]/div/div[1]/div/div/button/div[3]")))
-actions.move_by_offset(737, 816).click().perform()
-actions.move_by_offset(-737, -816).perform()
+actions.move_by_offset(737, 821).click().perform()
+actions.move_by_offset(-737, -821).perform()
 WebDriverWait(driver, 1000).until(lambda driver: driver.execute_script("return document.readyState") == "complete")
 
 #Skip past security (if applicable)
@@ -60,15 +60,18 @@ WebDriverWait(driver, 1000).until(lambda driver: driver.execute_script("return d
 
 def find_recommendations():
     global actions
-    video_elements = driver.find_elements(By.XPATH, '//*[@id="video-title"]')
+    video_elements = driver.find_elements(By.CSS_SELECTOR, 'a#thumbnail')
 
-    links = []
-    for i in range(min(10, len(video_elements))):
-        video_url = video_elements[i].get_attribute('href')
-        links.append(video_url)
+    print(video_elements)
+    # Collect the first 10 video URLs
+    top_10_videos = []
+    for video in video_elements[:10]:
+        video_url = video.get_attribute('href')
+        top_10_videos.append(video_url)
 
-    for idx, video in enumerate(links):
-        print(f"{idx + 1}: {video}")
+    # Print the links
+    for idx, link in enumerate(top_10_videos):
+        print(f"Video {idx + 1}: {link}")
 
 if __name__ == "__main__":
     find_recommendations()
