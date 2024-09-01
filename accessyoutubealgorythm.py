@@ -63,16 +63,21 @@ def find_recommendations():
     video_elements = driver.find_elements(By.CSS_SELECTOR, 'a#thumbnail')
 
     print(video_elements)
-    # Collect the first 10 video URLs
+    print(len(video_elements))
     top_10_videos = []
-    for video in video_elements[:10]:
+    top_10_names = []
+    for video in video_elements:
         video_url = video.get_attribute('href')
-        top_10_videos.append(video_url)
-
-    # Print the links
+        if video_url and 'googleadservices.com' not in video_url:
+            video_title_element = video.find_element(By.XPATH, './/ancestor::ytd-thumbnail//following-sibling::div[@id="meta"]//h3//a')
+            video_title = video_title_element.get_attribute('title')
+            top_10_videos.append(video_url)
+            top_10_names.append(video_title)
+        if len(top_10_videos) >= 10:
+            break
     for idx, link in enumerate(top_10_videos):
         print(f"Video {idx + 1}: {link}")
-
+    return top_10_videos, top_10_names
 if __name__ == "__main__":
     find_recommendations()
 

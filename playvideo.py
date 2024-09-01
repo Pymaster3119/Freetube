@@ -160,8 +160,18 @@ def play_video():
 
     update_frame()
 
-tk.Entry(root, textvariable=video_URL).pack()
-tk.Button(root, text="Load Video", command=load_video).pack()
-cv2.setUseOptimized(True)
+def drawhome():
+    global root, video_URL
+    for i in root.winfo_children():
+        i.destroy()
+    links, names = accessyoutubealgorythm()
+    for idx, i in enumerate(links):
+        tk.Button(root, text=i, command=lambda: video_URL.set(i)).pack()
+    tk.Button(root, text = "Download and view video", command= load_video).pack()
+    
+tk.Label(root, text="Loading, please wait...").pack()
+tk.Label(root, text="Check the command line to enter your username and password").pack()
+import accessyoutubealgorythm
+root.after(120_000, drawhome)
 
 root.mainloop()
